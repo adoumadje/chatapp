@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: chatapp
+
+  h2:
+    console:
+      enabled: true
+  datasource:
+    url: jdbc:h2:mem:chatappdb
+    username: sa
+    password: ''
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
