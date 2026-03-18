@@ -1,6 +1,17 @@
 server:
   port: 8080
 
+client:
+  url: "chrome-extension://*"
+
+broker:
+  prefix:
+    destination: "/topic"
+    handshake: "/ws-handshake"
+    private-message: "/topic/private-message"
+    group-message: "/topic/group-message"
+    application-message: "/app"
+
 spring:
   application:
     name: chatapp

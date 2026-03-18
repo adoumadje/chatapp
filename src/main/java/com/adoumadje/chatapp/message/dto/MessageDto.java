@@ -1,16 +1,18 @@
 package com.adoumadje.chatapp.message.dto;
 
 import com.adoumadje.chatapp.message.enums.MessageType;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 import java.util.UUID;
 
-@Getter @Setter
+@Data
 public class MessageDto {
     private MessageType messageType;
     private String messageText;
     private String messageImageUrl;
+    @NotNull(message = "Sender ID is mandatory")
     private UUID senderId;
+    @NotNull(message = "receiver ID is mandatory")
     private UUID receiverId;
 }
