@@ -1,5 +1,5 @@
 package com.adoumadje.chatapp.message.enums;
 
-public enum MessageType {
+public enum MessageTarget {
     PRIVATE, GROUP
 }

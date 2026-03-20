@@ -2,7 +2,8 @@ package com.adoumadje.chatapp.message.controller;
 
 import com.adoumadje.chatapp.message.dto.MessageDto;
 import com.adoumadje.chatapp.message.entity.Message;
-import com.adoumadje.chatapp.message.enums.MessageType;
+import com.adoumadje.chatapp.message.enums.MessageAction;
+import com.adoumadje.chatapp.message.enums.MessageTarget;
 import com.adoumadje.chatapp.message.service.IMessageService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -29,12 +30,25 @@ public class WebSocketController {
 
     @MessageMapping("/private-message")
     public void handlePrivateMessage(@Payload @Validated MessageDto messageDto) {
-        if(messageDto.getMessageType() != MessageType.PRIVATE) {
+        if(messageDto.getMessageTarget() != MessageTarget.PRIVATE) {
             throw new RuntimeException("Wrong Destination");
         }
-        logger.info("message: {}", messageDto);
         Message savedMessage = messageService.saveMessage(messageDto);
+        messageDto.setTimeStamp(savedMessage.getCreatedAt());
         simpMessagingTemplate.convertAndSend(privateMessagePrefix + "/" + messageDto.getReceiverId(),
+                messageDto);
+        messageDto.setMessageAction(MessageAction.ACKNOWLEDGE);
+        simpMessagingTemplate.convertAndSend(privateMessagePrefix + "/" + messageDto.getSenderId(),
+                messageDto);
+    }
+
+    @MessageMapping("/group-message")
+    public void handleGroupMessage(@Payload @Validated MessageDto messageDto) {
+        if (messageDto.getMessageTarget() != MessageTarget.GROUP) {
+            throw new RuntimeException("Wrong Destination");
+        }
+        Message savedMessage = messageService.saveMessage(messageDto);
+        simpMessagingTemplate.convertAndSend(groupMessagePrefix + "/" + messageDto.getReceiverId(),
                 messageDto);
     }
 }

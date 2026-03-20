@@ -1,4 +1,6 @@
 package com.adoumadje.chatapp.message.entity;
 
-public class Message {
+import com.adoumadje.chatapp.common.entity.BaseEntity;
+
+public class Message extends BaseEntity {
 }
