@@ -2,6 +2,7 @@ package com.adoumadje.chatapp.message.controller;
 
 import com.adoumadje.chatapp.message.dto.MessageDto;
 import com.adoumadje.chatapp.message.entity.Message;
+import com.adoumadje.chatapp.message.enums.MessageType;
 import com.adoumadje.chatapp.message.enums.MessageTarget;
 import com.adoumadje.chatapp.message.service.IMessageService;
 import org.jspecify.annotations.Nullable;
@@ -42,13 +43,18 @@ class WebSocketControllerTest {
     private String applicationMessagePrefix;
     @Value("${broker.prefix.private-message}")
     private String privateMessagePrefix;
+    @Value("${broker.prefix.group-message}")
+    private String groupMessagePrefix;
 
     private UUID senderId;
     private UUID receiverId;
+    private UUID groupId;
 
     private String CONNECT_URL;
     private String SEND_PRIVATE_MESSAGE;
+    private String SEND_GROUP_MESSAGE;
     private String SUBSCRIBE_PRIVATE_MESSAGE;
+    private String SUBSCRIBE_GROUP_MESSAGE;
 
     private CompletableFuture<MessageDto> completableFuture;
     private MessageDto messageDto;
@@ -59,10 +65,11 @@ class WebSocketControllerTest {
     void setUp() {
         senderId = UUID.randomUUID();
         receiverId = UUID.randomUUID();
+        groupId = UUID.randomUUID();
 
         CONNECT_URL = "http://localhost:" + localServerPort + handshakePrefix;
         SEND_PRIVATE_MESSAGE = applicationMessagePrefix + "/private-message";
-        SUBSCRIBE_PRIVATE_MESSAGE = privateMessagePrefix + "/" + receiverId;
+        SEND_GROUP_MESSAGE = applicationMessagePrefix + "/group-message";
 
         messageDto = createMessageDto();
 
@@ -74,6 +81,7 @@ class WebSocketControllerTest {
         msgDto.setMessageText("Hello there!");
         msgDto.setSenderId(senderId);
         msgDto.setReceiverId(receiverId);
+        msgDto.setMessageType(MessageType.MESSAGE);
         return msgDto;
     }
 
@@ -81,9 +89,11 @@ class WebSocketControllerTest {
     void tearDown() {
     }
 
-    @DisplayName("Send Message")
+    @DisplayName("Send Private Message - Sender")
     @Test
-    void testHandlePrivateMessage_WhenSent_ReceiveWithTimeStamp() throws ExecutionException, InterruptedException, TimeoutException {
+    void testHandlePrivateMessage_SenderSide_WhenSent_ReceiveWithTimeStamp() throws ExecutionException, InterruptedException, TimeoutException {
+        SUBSCRIBE_PRIVATE_MESSAGE = privateMessagePrefix + "/" + senderId;
+
         Mockito.when(messageService.saveMessage(Mockito.any(MessageDto.class))).thenReturn(createMessageEntity());
 
         WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(createClientTransport()));
@@ -93,10 +103,62 @@ class WebSocketControllerTest {
                 .get(1, TimeUnit.SECONDS);
 
         stompSession.subscribe(SUBSCRIBE_PRIVATE_MESSAGE, new MessageStompFrameHandler());
+
         messageDto.setMessageTarget(MessageTarget.PRIVATE);
         stompSession.send(SEND_PRIVATE_MESSAGE, messageDto);
 
         MessageDto receivedMsg  = completableFuture.get(5, TimeUnit.SECONDS);
+
+        Assertions.assertNotNull(receivedMsg.getTimeStamp());
+        Assertions.assertEquals(MessageType.ACKNOWLEDGE, receivedMsg.getMessageType());
+    }
+
+    @DisplayName("Send Private Message - Receiver")
+    @Test
+    void testHandlePrivateMessage_ReceiverSide_WhenSent_ReceiveWithTimeStamp() throws ExecutionException, InterruptedException, TimeoutException {
+        SUBSCRIBE_PRIVATE_MESSAGE = privateMessagePrefix + "/" + receiverId;
+
+        Mockito.when(messageService.saveMessage(Mockito.any(MessageDto.class))).thenReturn(createMessageEntity());
+
+        WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(createClientTransport()));
+        stompClient.setMessageConverter(new JacksonJsonMessageConverter());
+
+        StompSession stompSessionReceiver = stompClient.connectAsync(CONNECT_URL, new StompSessionHandlerAdapterExt())
+                .get(1, TimeUnit.SECONDS);
+        stompSessionReceiver.subscribe(SUBSCRIBE_PRIVATE_MESSAGE, new MessageStompFrameHandler());
+
+        StompSession stompSessionSender = stompClient.connectAsync(CONNECT_URL, new StompSessionHandlerAdapterExt())
+                .get(1, TimeUnit.SECONDS);
+        messageDto.setMessageTarget(MessageTarget.PRIVATE);
+        stompSessionSender.send(SEND_PRIVATE_MESSAGE, messageDto);
+
+        MessageDto receivedMsg  = completableFuture.get(5, TimeUnit.SECONDS);
+
+        Assertions.assertNotNull(receivedMsg.getTimeStamp());
+        Assertions.assertEquals(MessageType.MESSAGE, receivedMsg.getMessageType());
+    }
+
+    @DisplayName("Send Group Message")
+    @Test
+    void testHandleGroupMessage_WhenMessage_ThenTimeStamp() throws ExecutionException, InterruptedException, TimeoutException {
+        SUBSCRIBE_GROUP_MESSAGE = groupMessagePrefix + "/" + groupId;
+
+        Mockito.when(messageService.saveMessage(Mockito.any(MessageDto.class))).thenReturn(createMessageEntity());
+
+        WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(createClientTransport()));
+        stompClient.setMessageConverter(new JacksonJsonMessageConverter());
+
+        StompSession stompSession = stompClient.connectAsync(CONNECT_URL, new StompSessionHandlerAdapterExt())
+                .get(1, TimeUnit.SECONDS);
+
+        stompSession.subscribe(SUBSCRIBE_GROUP_MESSAGE, new MessageStompFrameHandler());
+
+        messageDto.setMessageTarget(MessageTarget.GROUP);
+        messageDto.setReceiverId(groupId);
+        stompSession.send(SEND_GROUP_MESSAGE, messageDto);
+
+        MessageDto receivedMsg  = completableFuture.get(5, TimeUnit.SECONDS);
+
         Assertions.assertNotNull(receivedMsg.getTimeStamp());
     }
 
@@ -111,6 +173,8 @@ class WebSocketControllerTest {
         transports.add(new WebSocketTransport(new StandardWebSocketClient()));
         return transports;
     }
+
+
 
     private class StompSessionHandlerAdapterExt extends StompSessionHandlerAdapter {
 

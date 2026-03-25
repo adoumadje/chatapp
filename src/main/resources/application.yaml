@@ -10,6 +10,7 @@ broker:
     handshake: "/ws-handshake"
     private-message: "/topic/private-message"
     group-message: "/topic/group-message"
+    error-message: "/topic/error-message"
     application-message: "/app"
 
 spring:
