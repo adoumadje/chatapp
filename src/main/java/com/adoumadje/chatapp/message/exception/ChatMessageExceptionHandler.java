@@ -46,4 +46,12 @@ public class ChatMessageExceptionHandler {
                 new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
         simpMessagingTemplate.convertAndSend(errorMessagePrefix + "/" + username, errorMessageDto);
     }
+
+    @MessageExceptionHandler(WrongMessageTargetException.class)
+    public void handleWrongMessageTargetException(WrongMessageTargetException exception) {
+        String username = "default";
+        ErrorMessageDto errorMessageDto = new ErrorMessageDto(MessageType.ERROR, username,
+                new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
+        simpMessagingTemplate.convertAndSend(errorMessagePrefix + "/" + username, errorMessageDto);
+    }
 }

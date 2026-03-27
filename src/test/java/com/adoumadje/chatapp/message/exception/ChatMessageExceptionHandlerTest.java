@@ -156,6 +156,75 @@ class ChatMessageExceptionHandlerTest {
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), receivedMsg.error().code());
     }
 
+    @DisplayName("Wrong Message Type - Private Message")
+    @Test
+    void testHandleWrongMessageTargetException_WhenPrivateMessage_ThrowsException() throws Exception {
+        SUBSCRIBE_ERROR_MESSAGE = errorMessagePrefix + "/default";
+
+        WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(createClientTransport()));
+        stompClient.setMessageConverter(new JacksonJsonMessageConverter());
+
+        StompSession stompSession = stompClient.connectAsync(CONNECT_URL, new StompSessionHandlerAdapterExt())
+                .get(1, TimeUnit.SECONDS);
+
+        stompSession.subscribe(SUBSCRIBE_ERROR_MESSAGE, new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return ErrorMessageDto.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, @Nullable Object payload) {
+                errorMessageDtoCompletableFuture.complete((ErrorMessageDto) payload);
+            }
+        });
+
+        messageDto.setMessageTarget(MessageTarget.GROUP);
+        stompSession.send(SEND_PRIVATE_MESSAGE, messageDto);
+
+        String expectedMessage = "Message is not a private message";
+
+        ErrorMessageDto receivedMsg  = errorMessageDtoCompletableFuture.get(5, TimeUnit.SECONDS);
+        Assertions.assertEquals(MessageType.ERROR, receivedMsg.messageType());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), receivedMsg.error().code());
+        Assertions.assertEquals(expectedMessage, receivedMsg.error().message());
+    }
+
+    @DisplayName("Wrong Message Type - Group Message")
+    @Test
+    void testHandleWrongMessageTargetException_WhenGroupMessage_ThrowsException() throws Exception {
+        SUBSCRIBE_ERROR_MESSAGE = errorMessagePrefix + "/default";
+
+        WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(createClientTransport()));
+        stompClient.setMessageConverter(new JacksonJsonMessageConverter());
+
+        StompSession stompSession = stompClient.connectAsync(CONNECT_URL, new StompSessionHandlerAdapterExt())
+                .get(1, TimeUnit.SECONDS);
+
+        stompSession.subscribe(SUBSCRIBE_ERROR_MESSAGE, new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return ErrorMessageDto.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, @Nullable Object payload) {
+                errorMessageDtoCompletableFuture.complete((ErrorMessageDto) payload);
+            }
+        });
+
+        messageDto.setReceiverId(groupId);
+        messageDto.setMessageTarget(MessageTarget.PRIVATE);
+        stompSession.send(SEND_GROUP_MESSAGE, messageDto);
+
+        String expectedMessage = "Message is not a group message";
+
+        ErrorMessageDto receivedMsg  = errorMessageDtoCompletableFuture.get(5, TimeUnit.SECONDS);
+        Assertions.assertEquals(MessageType.ERROR, receivedMsg.messageType());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), receivedMsg.error().code());
+        Assertions.assertEquals(expectedMessage, receivedMsg.error().message());
+    }
+
     private List<Transport> createClientTransport() {
         List<Transport> transports = new ArrayList<>(1);
         transports.add(new WebSocketTransport(new StandardWebSocketClient()));
