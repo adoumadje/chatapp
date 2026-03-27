@@ -46,6 +46,7 @@ class WebSocketControllerTest {
     @Value("${broker.prefix.group-message}")
     private String groupMessagePrefix;
 
+    private UUID chatId;
     private UUID senderId;
     private UUID receiverId;
     private UUID groupId;
@@ -63,6 +64,7 @@ class WebSocketControllerTest {
 
     @BeforeEach
     void setUp() {
+        chatId = UUID.randomUUID();
         senderId = UUID.randomUUID();
         receiverId = UUID.randomUUID();
         groupId = UUID.randomUUID();
@@ -79,14 +81,11 @@ class WebSocketControllerTest {
     private MessageDto createMessageDto() {
         MessageDto msgDto = new MessageDto();
         msgDto.setMessageText("Hello there!");
+        msgDto.setChatId(chatId);
         msgDto.setSenderId(senderId);
         msgDto.setReceiverId(receiverId);
         msgDto.setMessageType(MessageType.MESSAGE);
         return msgDto;
-    }
-
-    @AfterEach
-    void tearDown() {
     }
 
     @DisplayName("Send Private Message - Sender")

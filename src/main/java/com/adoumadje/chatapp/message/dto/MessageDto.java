@@ -10,7 +10,9 @@ import java.util.UUID;
 
 @Data
 public class MessageDto {
+    @NotNull(message = "Message Target is mandatory")
     private MessageTarget messageTarget;
+    @NotNull(message = "Message Type is mandatory")
     private MessageType messageType;
     private String messageText;
     private String messageImageUrl;
