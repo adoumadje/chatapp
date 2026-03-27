@@ -1,7 +1,6 @@
 package com.adoumadje.chatapp.message.controller;
 
 import com.adoumadje.chatapp.message.dto.MessageDto;
-import com.adoumadje.chatapp.message.entity.Message;
 import com.adoumadje.chatapp.message.enums.MessageType;
 import com.adoumadje.chatapp.message.enums.MessageTarget;
 import com.adoumadje.chatapp.message.service.IMessageService;
@@ -93,7 +92,7 @@ class WebSocketControllerTest {
     void testHandlePrivateMessage_SenderSide_WhenSent_ReceiveWithTimeStamp() throws ExecutionException, InterruptedException, TimeoutException {
         SUBSCRIBE_PRIVATE_MESSAGE = privateMessagePrefix + "/" + senderId;
 
-        Mockito.when(messageService.saveMessage(Mockito.any(MessageDto.class))).thenReturn(createMessageEntity());
+        Mockito.when(messageService.savePrivateMessage(Mockito.any(MessageDto.class))).thenReturn(createResponseMessageDto());
 
         WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(createClientTransport()));
         stompClient.setMessageConverter(new JacksonJsonMessageConverter());
@@ -117,7 +116,7 @@ class WebSocketControllerTest {
     void testHandlePrivateMessage_ReceiverSide_WhenSent_ReceiveWithTimeStamp() throws ExecutionException, InterruptedException, TimeoutException {
         SUBSCRIBE_PRIVATE_MESSAGE = privateMessagePrefix + "/" + receiverId;
 
-        Mockito.when(messageService.saveMessage(Mockito.any(MessageDto.class))).thenReturn(createMessageEntity());
+        Mockito.when(messageService.savePrivateMessage(Mockito.any(MessageDto.class))).thenReturn(createResponseMessageDto());
 
         WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(createClientTransport()));
         stompClient.setMessageConverter(new JacksonJsonMessageConverter());
@@ -142,7 +141,7 @@ class WebSocketControllerTest {
     void testHandleGroupMessage_WhenMessage_ThenTimeStamp() throws ExecutionException, InterruptedException, TimeoutException {
         SUBSCRIBE_GROUP_MESSAGE = groupMessagePrefix + "/" + groupId;
 
-        Mockito.when(messageService.saveMessage(Mockito.any(MessageDto.class))).thenReturn(createMessageEntity());
+        Mockito.when(messageService.saveGroupMessage(Mockito.any(MessageDto.class))).thenReturn(createResponseMessageDto());
 
         WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(createClientTransport()));
         stompClient.setMessageConverter(new JacksonJsonMessageConverter());
@@ -161,10 +160,9 @@ class WebSocketControllerTest {
         Assertions.assertNotNull(receivedMsg.getTimeStamp());
     }
 
-    private Message createMessageEntity() {
-        Message message = new Message();
-        message.setCreatedAt(LocalDateTime.now());
-        return message;
+    private MessageDto createResponseMessageDto() {
+        messageDto.setTimeStamp(LocalDateTime.now());
+        return messageDto;
     }
 
     private List<Transport> createClientTransport() {

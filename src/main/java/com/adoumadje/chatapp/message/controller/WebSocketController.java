@@ -1,9 +1,8 @@
 package com.adoumadje.chatapp.message.controller;
 
 import com.adoumadje.chatapp.message.dto.MessageDto;
-import com.adoumadje.chatapp.message.entity.Message;
-import com.adoumadje.chatapp.message.enums.MessageType;
 import com.adoumadje.chatapp.message.enums.MessageTarget;
+import com.adoumadje.chatapp.message.enums.MessageType;
 import com.adoumadje.chatapp.message.exception.WrongMessageTargetException;
 import com.adoumadje.chatapp.message.service.IMessageService;
 import lombok.RequiredArgsConstructor;
@@ -34,13 +33,12 @@ public class WebSocketController {
         if(messageDto.getMessageTarget() != MessageTarget.PRIVATE) {
             throw new WrongMessageTargetException("Message is not a private message");
         }
-        Message savedMessage = messageService.saveMessage(messageDto);
-        messageDto.setTimeStamp(savedMessage.getCreatedAt());
+        MessageDto savedMessageDto = messageService.savePrivateMessage(messageDto);
         simpMessagingTemplate.convertAndSend(privateMessagePrefix + "/" + messageDto.getReceiverId(),
-                messageDto);
-        messageDto.setMessageType(MessageType.ACKNOWLEDGE);
+                savedMessageDto);
+        savedMessageDto.setMessageType(MessageType.ACKNOWLEDGE);
         simpMessagingTemplate.convertAndSend(privateMessagePrefix + "/" + messageDto.getSenderId(),
-                messageDto);
+                savedMessageDto);
     }
 
     @MessageMapping("/group-message")
@@ -48,9 +46,8 @@ public class WebSocketController {
         if (messageDto.getMessageTarget() != MessageTarget.GROUP) {
             throw new WrongMessageTargetException("Message is not a group message");
         }
-        Message savedMessage = messageService.saveMessage(messageDto);
-        messageDto.setTimeStamp(savedMessage.getCreatedAt());
+        MessageDto savedMessageDto = messageService.saveGroupMessage(messageDto);
         simpMessagingTemplate.convertAndSend(groupMessagePrefix + "/" + messageDto.getReceiverId(),
-                messageDto);
+                savedMessageDto);
     }
 }

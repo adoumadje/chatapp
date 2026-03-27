@@ -23,4 +23,5 @@ public class MessageDto {
     @NotNull(message = "Chat ID is mandatory")
     private UUID chatId;
     private LocalDateTime timeStamp;
+    private UUID messageId;
 }
