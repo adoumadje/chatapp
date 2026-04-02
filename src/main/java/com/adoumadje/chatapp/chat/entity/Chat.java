@@ -1,4 +1,6 @@
 package com.adoumadje.chatapp.chat.entity;
 
-public class Chat {
+import com.adoumadje.chatapp.common.entity.BaseEntity;
+
+public class Chat extends BaseEntity {
 }
