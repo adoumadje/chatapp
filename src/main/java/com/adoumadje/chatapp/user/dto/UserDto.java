@@ -1,4 +1,7 @@
 package com.adoumadje.chatapp.user.dto;
 
-public record UserDto() {
+import java.util.UUID;
+
+public record UserDto(String username, String firstname, String lastname, String email, String profilePictureUrl,
+        UUID mailBoxId) {
 }

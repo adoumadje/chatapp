@@ -4,6 +4,7 @@ import com.adoumadje.chatapp.common.exception.ResourceNotFoundException;
 import com.adoumadje.chatapp.user.UserRepository;
 import com.adoumadje.chatapp.user.dto.UserDto;
 import com.adoumadje.chatapp.user.entity.ChatUser;
+import com.adoumadje.chatapp.user.mapper.UserMapper;
 import com.adoumadje.chatapp.user.service.IUserService;
 import com.adoumadje.chatapp.user.utils.Constants;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserServiceImpl implements IUserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
     public List<UserDto> findUsers(Principal principal, String keyword, Integer pageNumber) {
@@ -27,18 +29,20 @@ public class UserServiceImpl implements IUserService {
         Optional<ChatUser> optionalChatUser = userRepository.findByEmail(email);
         if(optionalChatUser.isEmpty()) {
             throw new ResourceNotFoundException(ChatUser.class.getSimpleName(), "email", email);
+
         }
         ChatUser user = optionalChatUser.get();
-        return keyword == null ? findUsers(user, pageable) : findUsers(user, keyword, pageable);
+        List<ChatUser> chatUsers = keyword == null ? findUsers(user, pageable) : findUsers(user, keyword, pageable);
+        return userMapper.toDtoList(chatUsers);
     }
 
-    private List<UserDto> findUsers(ChatUser user, Pageable pageable) {
-        Page<ChatUser> chatUsersPage = userRepository.findByIdNot(user.getId(), pageable);
-        List<ChatUser> chatUsers = chatUsersPage.getContent();
-        return null;
+    private List<ChatUser> findUsers(ChatUser user, Pageable pageable) {
+        Page<ChatUser> chatUserPage = userRepository.findByIdNot(user.getId(), pageable);
+        return chatUserPage.getContent();
     }
 
-    private List<UserDto> findUsers(ChatUser user, String keyword, Pageable page) {
-        return null;
+    private List<ChatUser> findUsers(ChatUser user, String keyword, Pageable pageable) {
+        Page<ChatUser> chatUserPage = userRepository.searchUsers(user.getId(), keyword, pageable);
+        return chatUserPage.getContent();
     }
 }
