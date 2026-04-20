@@ -14,12 +14,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,16 +38,19 @@ class UserControllerWebLayerTest {
     @DisplayName("find users when no param specified")
     @Test
     void testFindUsers_WhenNoQueryParam_ThenNormal() throws Exception {
-        Mockito.when(iUserService.findUsers(Mockito.any(), Mockito.any(), Mockito.anyInt()))
+        Mockito.when(iUserService.findUsers(Mockito.any(), Mockito.any(), Mockito.any()))
+
                 .thenReturn(createUserDtoList());
 
-        RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/api/v1/users");
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/api/v1/users")
+                .principal(() -> "John");
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+                .andReturn();
 
         String reponseBodyAsString = mvcResult.getResponse().getContentAsString();
 
-        List<UserDto> userDtos = new ObjectMapper().convertValue(reponseBodyAsString,
+        List<UserDto> userDtos = new ObjectMapper().readValue(reponseBodyAsString,
                 new TypeReference<List<UserDto>>() {});
 
         // Assertions
