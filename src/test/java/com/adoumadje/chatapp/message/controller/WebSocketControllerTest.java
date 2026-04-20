@@ -54,7 +54,6 @@ class WebSocketControllerTest {
     private String SEND_PRIVATE_MESSAGE;
     private String SEND_GROUP_MESSAGE;
     private String SUBSCRIBE_PRIVATE_MESSAGE;
-    private String SUBSCRIBE_GROUP_MESSAGE;
 
     private CompletableFuture<MessageDto> completableFuture;
     private MessageDto messageDto;
@@ -139,7 +138,7 @@ class WebSocketControllerTest {
     @DisplayName("Send Group Message")
     @Test
     void testHandleGroupMessage_WhenMessage_ThenTimeStamp() throws ExecutionException, InterruptedException, TimeoutException {
-        SUBSCRIBE_GROUP_MESSAGE = groupMessagePrefix + "/" + groupId;
+        String SUBSCRIBE_GROUP_MESSAGE = groupMessagePrefix + "/" + groupId;
 
         Mockito.when(messageService.saveGroupMessage(Mockito.any(MessageDto.class))).thenReturn(createResponseMessageDto());
 
