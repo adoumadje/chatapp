@@ -1,7 +1,7 @@
 package com.adoumadje.chatapp.user.service.implementation;
 
 import com.adoumadje.chatapp.common.exception.ResourceNotFoundException;
-import com.adoumadje.chatapp.user.UserRepository;
+import com.adoumadje.chatapp.user.repository.UserRepository;
 import com.adoumadje.chatapp.user.dto.UserDto;
 import com.adoumadje.chatapp.user.entity.ChatUser;
 import com.adoumadje.chatapp.user.mapper.UserMapper;
@@ -11,12 +11,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
+@Service
 public class UserServiceImpl implements IUserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;

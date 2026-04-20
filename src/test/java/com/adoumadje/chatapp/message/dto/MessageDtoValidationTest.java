@@ -32,7 +32,7 @@ class MessageDtoValidationTest {
     void testMessageDto_WhenSenderIdNull_ThenViolation() {
         json = """
                 {
-                    "messageType": "PRIVATE",
+                    "messageTarget": "PRIVATE",
                     "messageText": "Hello world!",
                     "messageImage": "",
                     "receiverId": "%s",
@@ -53,7 +53,7 @@ class MessageDtoValidationTest {
     void testMessageDto_WhenReceiverIdNull_ThenException() {
         json = """
                 {
-                    "messageType": "PRIVATE",
+                    "messageTarget": "PRIVATE",
                     "messageText": "Hello world!",
                     "messageImage": "",
                     "senderId": "%s",
@@ -74,7 +74,7 @@ class MessageDtoValidationTest {
     void testMessageDto_WhenChatIdNull_ThenException() {
         json = """
                 {
-                    "messageType": "PRIVATE",
+                    "messageTarget": "PRIVATE",
                     "messageText": "Hello world!",
                     "messageImage": "",
                     "senderId": "%s",

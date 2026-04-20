@@ -1,11 +1,13 @@
 package com.adoumadje.chatapp.user.entity;
 
 import com.adoumadje.chatapp.common.entity.BaseEntity;
+import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.UUID;
 
+@Entity
 @Getter @Setter
 public class ChatUser extends BaseEntity {
     private String username;

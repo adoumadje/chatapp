@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -29,6 +30,8 @@ class UserControllerWebLayerTest {
     private MockMvc mockMvc;
     @MockitoBean
     private IUserService iUserService;
+    @MockitoBean
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     @BeforeEach
     void setUp() {

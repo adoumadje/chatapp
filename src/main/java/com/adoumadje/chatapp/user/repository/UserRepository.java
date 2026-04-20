@@ -1,4 +1,4 @@
-package com.adoumadje.chatapp.user;
+package com.adoumadje.chatapp.user.repository;
 
 import com.adoumadje.chatapp.user.entity.ChatUser;
 import org.springframework.data.domain.Page;
