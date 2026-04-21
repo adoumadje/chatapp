@@ -58,6 +58,55 @@ class UserControllerWebLayerTest {
         Assertions.assertFalse(userDtos.isEmpty());
     }
 
+    @DisplayName("find users when keyword specified")
+    @Test
+    void testFindUsers_WhenKeyword_ThenNormal() throws Exception {
+        Mockito.when(iUserService.findUsers(Mockito.any(), Mockito.any(), Mockito.any()))
+
+                .thenReturn(createUserDtoList());
+
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/api/v1/users")
+                .principal(() -> "John")
+                .param("keyword", "Kyl");
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+                .andReturn();
+
+        String reponseBodyAsString = mvcResult.getResponse().getContentAsString();
+
+        List<UserDto> userDtos = new ObjectMapper().readValue(reponseBodyAsString,
+                new TypeReference<List<UserDto>>() {});
+
+        // Assertions
+
+        Assertions.assertFalse(userDtos.isEmpty());
+    }
+
+    @DisplayName("find users when keyword and pageNumber specified")
+    @Test
+    void testFindUsers_WhenKeywordAndPageNumber_ThenNormal() throws Exception {
+        Mockito.when(iUserService.findUsers(Mockito.any(), Mockito.any(), Mockito.any()))
+
+                .thenReturn(createUserDtoList());
+
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/api/v1/users")
+                .principal(() -> "John")
+                .param("keyword", "Kyl")
+                .param("pageNumber", "0");
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+                .andReturn();
+
+        String reponseBodyAsString = mvcResult.getResponse().getContentAsString();
+
+        List<UserDto> userDtos = new ObjectMapper().readValue(reponseBodyAsString,
+                new TypeReference<List<UserDto>>() {});
+
+        // Assertions
+
+        Assertions.assertFalse(userDtos.isEmpty());
+    }
+
     private List<UserDto> createUserDtoList() {
         return List.of(
                 new UserDto("user215", "kylian", "Mbappe", "kyks@example.com",
