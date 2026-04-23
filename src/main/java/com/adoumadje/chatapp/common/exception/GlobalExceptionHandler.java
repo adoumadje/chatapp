@@ -1,6 +1,7 @@
 package com.adoumadje.chatapp.common.exception;
 
 import com.adoumadje.chatapp.common.dto.ResponseDto;
+import com.adoumadje.chatapp.user.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +23,18 @@ public class GlobalExceptionHandler {
         if(!profile.equals("prod")) {
             logger.error(exception.getMessage());
         }
-        ResponseDto responseDto = new ResponseDto(HttpStatus.NOT_FOUND.value(),
+        ResponseDto responseDto = new ResponseDto(Constants.STATUS_NOT_FOUND,
                 exception.getMessage());
         return new ResponseEntity<>(responseDto, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ResponseDto> handleResourceAlreadyExistsException(ResourceAlreadyExistsException exception) {
+        if(!profile.equals("prod")) {
+            logger.error(exception.getMessage());
+        }
+        ResponseDto responseDto = new ResponseDto(HttpStatus.BAD_REQUEST.value(),
+                exception.getMessage());
+        return new ResponseEntity<>(responseDto, HttpStatus.BAD_REQUEST);
     }
 }

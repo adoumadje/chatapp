@@ -1,6 +1,9 @@
 package com.adoumadje.chatapp.user.service.implementation;
 
+import com.adoumadje.chatapp.common.dto.ResponseDto;
+import com.adoumadje.chatapp.common.exception.ResourceAlreadyExistsException;
 import com.adoumadje.chatapp.common.exception.ResourceNotFoundException;
+import com.adoumadje.chatapp.user.dto.UserRegistrationDto;
 import com.adoumadje.chatapp.user.repository.UserRepository;
 import com.adoumadje.chatapp.user.dto.UserDto;
 import com.adoumadje.chatapp.user.entity.ChatUser;
@@ -11,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -36,6 +40,24 @@ public class UserServiceImpl implements IUserService {
         ChatUser user = optionalChatUser.get();
         List<ChatUser> chatUsers = keyword == null ? findUsers(user, pageable) : findUsers(user, keyword, pageable);
         return userMapper.toDtoList(chatUsers);
+    }
+
+    @Override
+    public ResponseDto registerUser(UserRegistrationDto userRegistrationDto) {
+        Optional<ChatUser> optionalChatUser = userRepository.findByUsername(userRegistrationDto.getUsername());
+        if(optionalChatUser.isPresent()) {
+            throw new ResourceAlreadyExistsException(ChatUser.class.getSimpleName(), "username",
+                    userRegistrationDto.getUsername());
+        }
+        optionalChatUser = userRepository.findByEmail(userRegistrationDto.getEmail());
+        if(optionalChatUser.isPresent()) {
+            throw new ResourceAlreadyExistsException(ChatUser.class.getSimpleName(), "email",
+                    userRegistrationDto.getEmail());
+        }
+        ChatUser chatUser = userMapper.toChatUser(userRegistrationDto);
+        ChatUser savedChatUser = userRepository.save(chatUser);
+        // Todo: Create and push event
+        return new ResponseDto(Constants.STATUS_ACCEPTED, Constants.USER_REGISTRATION_MSG);
     }
 
     private List<ChatUser> findUsers(ChatUser user, Pageable pageable) {

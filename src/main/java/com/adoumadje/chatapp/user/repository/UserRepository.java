@@ -1,6 +1,7 @@
 package com.adoumadje.chatapp.user.repository;
 
 import com.adoumadje.chatapp.user.entity.ChatUser;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +28,6 @@ public interface UserRepository extends JpaRepository<ChatUser, Long> {
             AND u.id <> :excludedId
             """)
     Page<ChatUser> searchUsers(@Param("excludedId") Long excludedId, @Param("keyword") String keyword, Pageable pageable);
+
+    Optional<ChatUser> findByUsername(String username);
 }
