@@ -1,6 +1,6 @@
 package com.adoumadje.chatapp.message.exception;
 
-import com.adoumadje.chatapp.common.dto.ErrorResponseDto;
+import com.adoumadje.chatapp.common.dto.ResponseDto;
 import com.adoumadje.chatapp.common.dto.ValidationErrorDto;
 import com.adoumadje.chatapp.message.dto.ErrorMessageDto;
 import com.adoumadje.chatapp.message.dto.ValidationErrorsMessageDto;
@@ -43,7 +43,7 @@ public class ChatMessageExceptionHandler {
     public void handleMessageConversionException(MessageConversionException exception) {
         String username = "default";
         ErrorMessageDto errorMessageDto = new ErrorMessageDto(MessageType.ERROR, username,
-                new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
+                new ResponseDto(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
         simpMessagingTemplate.convertAndSend(errorMessagePrefix + "/" + username, errorMessageDto);
     }
 
@@ -51,7 +51,7 @@ public class ChatMessageExceptionHandler {
     public void handleWrongMessageTargetException(WrongMessageTargetException exception) {
         String username = "default";
         ErrorMessageDto errorMessageDto = new ErrorMessageDto(MessageType.ERROR, username,
-                new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
+                new ResponseDto(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
         simpMessagingTemplate.convertAndSend(errorMessagePrefix + "/" + username, errorMessageDto);
     }
 }
