@@ -1,4 +1,4 @@
-package com.adoumadje.chatapp.user.utils;
+package com.adoumadje.chatapp.common.utils;
 
 import org.springframework.http.HttpStatus;
 

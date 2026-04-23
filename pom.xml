@@ -26,10 +26,21 @@
 		<tag/>
 		<url/>
 	</scm>
+
 	<properties>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<java.version>21</java.version>
 	</properties>
+
+
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/adoumadje/chatapp-core</url>
+		</repository>
+	</repositories>
+
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -71,6 +82,16 @@
 			<artifactId>mapstruct</artifactId>
 			<version>${org.mapstruct.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.adoumadje.chatapp.core</groupId>
+			<artifactId>chatapp-core</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

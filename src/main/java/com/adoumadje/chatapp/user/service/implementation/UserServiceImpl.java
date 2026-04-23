@@ -3,18 +3,18 @@ package com.adoumadje.chatapp.user.service.implementation;
 import com.adoumadje.chatapp.common.dto.ResponseDto;
 import com.adoumadje.chatapp.common.exception.ResourceAlreadyExistsException;
 import com.adoumadje.chatapp.common.exception.ResourceNotFoundException;
+import com.adoumadje.chatapp.core.events.UserRegisteredEvent;
 import com.adoumadje.chatapp.user.dto.UserRegistrationDto;
 import com.adoumadje.chatapp.user.repository.UserRepository;
 import com.adoumadje.chatapp.user.dto.UserDto;
 import com.adoumadje.chatapp.user.entity.ChatUser;
 import com.adoumadje.chatapp.user.mapper.UserMapper;
 import com.adoumadje.chatapp.user.service.IUserService;
-import com.adoumadje.chatapp.user.utils.Constants;
+import com.adoumadje.chatapp.common.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -56,7 +56,8 @@ public class UserServiceImpl implements IUserService {
         }
         ChatUser chatUser = userMapper.toChatUser(userRegistrationDto);
         ChatUser savedChatUser = userRepository.save(chatUser);
-        // Todo: Create and push event
+        UserRegisteredEvent userRegisteredEvent = userMapper.toUserRegisteredEvent(savedChatUser);
+        // Todo: publish event
         return new ResponseDto(Constants.STATUS_ACCEPTED, Constants.USER_REGISTRATION_MSG);
     }
 

@@ -1,7 +1,7 @@
 package com.adoumadje.chatapp.common.exception;
 
 import com.adoumadje.chatapp.common.dto.ResponseDto;
-import com.adoumadje.chatapp.user.utils.Constants;
+import com.adoumadje.chatapp.common.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

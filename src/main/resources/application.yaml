@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8088
 
 client:
   url: "chrome-extension://*"
@@ -29,3 +29,36 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: 'create-drop'
+
+# Kafka
+  kafka:
+    admin:
+      auto-create: true
+    bootstrap-servers: localhost:9091
+
+# Kafka Producer
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable:
+          idempotence: true
+        linger:
+          ms: 0
+        allow:
+          auto:
+            create:
+              topics: false
+        max:
+          in:
+            flight:
+              requests:
+                per:
+                  connection: 5
+        request:
+          timeout:
+            ms: 30000
+        delivery:
+          timeout:
+            ms: 120000
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
