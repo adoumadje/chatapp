@@ -47,7 +47,7 @@ spring:
         allow:
           auto:
             create:
-              topics: false
+              topics: true
         max:
           in:
             flight:
@@ -62,3 +62,8 @@ spring:
             ms: 120000
       acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+user:
+  events:
+    topic:
+      name: "user-events"

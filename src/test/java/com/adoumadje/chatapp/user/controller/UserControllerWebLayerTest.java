@@ -1,6 +1,9 @@
 package com.adoumadje.chatapp.user.controller;
 
+import com.adoumadje.chatapp.common.dto.ResponseDto;
+import com.adoumadje.chatapp.common.utils.Constants;
 import com.adoumadje.chatapp.user.dto.UserDto;
+import com.adoumadje.chatapp.user.dto.UserRegistrationDto;
 import com.adoumadje.chatapp.user.service.IUserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -105,6 +109,38 @@ class UserControllerWebLayerTest {
         // Assertions
 
         Assertions.assertFalse(userDtos.isEmpty());
+    }
+
+    @DisplayName("register user")
+    @Test
+    void testregisterUser_WhenGoodBody_ThenNormal() throws Exception {
+        Mockito.when(iUserService.registerUser(Mockito.any()))
+                .thenReturn(new ResponseDto(Constants.STATUS_ACCEPTED, Constants.USER_REGISTRATION_MSG));
+
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/api/v1/users")
+                .contentType("application/json")
+                .content(new ObjectMapper().writeValueAsString(createUserRegistrationDto()));
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isAccepted())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code").value(Constants.STATUS_ACCEPTED))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(Constants.USER_REGISTRATION_MSG));
+
+    }
+
+    private UserRegistrationDto createUserRegistrationDto() {
+        UserRegistrationDto userRegistrationDto = new UserRegistrationDto();
+
+        userRegistrationDto.setUsername("jdoe");
+        userRegistrationDto.setFirstname("John");
+        userRegistrationDto.setLastname("Doe");
+        userRegistrationDto.setEmail("john.doe@example.com");
+        userRegistrationDto.setProfilePictureUrl("https://example.com/images/jdoe.png");
+        userRegistrationDto.setPassword("Secure@124");
+        userRegistrationDto.setConfirmPassword("Secure@124");
+
+        return userRegistrationDto;
+
     }
 
     private List<UserDto> createUserDtoList() {

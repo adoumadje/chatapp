@@ -7,6 +7,8 @@ public final class Constants {
 
     public static final int STATUS_ACCEPTED = HttpStatus.ACCEPTED.value();
     public static final int STATUS_NOT_FOUND = HttpStatus.NOT_FOUND.value();
+    public static final int STATUS_BAD_REQUEST = HttpStatus.BAD_REQUEST.value();
 
     public static final String USER_REGISTRATION_MSG = "User registered successfully";
+
 }

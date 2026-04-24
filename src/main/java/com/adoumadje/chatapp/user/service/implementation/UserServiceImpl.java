@@ -12,20 +12,29 @@ import com.adoumadje.chatapp.user.mapper.UserMapper;
 import com.adoumadje.chatapp.user.service.IUserService;
 import com.adoumadje.chatapp.common.utils.Constants;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements IUserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Value("$user.events.topic.name")
+    private String userEventsTopicName;
+
 
     @Override
     public List<UserDto> findUsers(Principal principal, String keyword, Integer pageNumber) {
@@ -35,7 +44,6 @@ public class UserServiceImpl implements IUserService {
         Optional<ChatUser> optionalChatUser = userRepository.findByEmail(email);
         if(optionalChatUser.isEmpty()) {
             throw new ResourceNotFoundException(ChatUser.class.getSimpleName(), "email", email);
-
         }
         ChatUser user = optionalChatUser.get();
         List<ChatUser> chatUsers = keyword == null ? findUsers(user, pageable) : findUsers(user, keyword, pageable);
@@ -55,9 +63,10 @@ public class UserServiceImpl implements IUserService {
                     userRegistrationDto.getEmail());
         }
         ChatUser chatUser = userMapper.toChatUser(userRegistrationDto);
+        chatUser.setMailBoxId(UUID.randomUUID());
         ChatUser savedChatUser = userRepository.save(chatUser);
         UserRegisteredEvent userRegisteredEvent = userMapper.toUserRegisteredEvent(savedChatUser);
-        // Todo: publish event
+        kafkaTemplate.send(userEventsTopicName, userRegisteredEvent);
         return new ResponseDto(Constants.STATUS_ACCEPTED, Constants.USER_REGISTRATION_MSG);
     }
 

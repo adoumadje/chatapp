@@ -20,6 +20,6 @@ public class ChatUser extends BaseEntity {
     @Column(unique = true, updatable = false)
     private String email;
     private String profilePictureUrl;
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(unique = true, updatable = false)
     private UUID mailBoxId;
 }
