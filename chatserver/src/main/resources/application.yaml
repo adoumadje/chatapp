@@ -30,13 +30,13 @@ spring:
     hibernate:
       ddl-auto: 'create-drop'
 
-# Kafka
+  # Kafka
   kafka:
     admin:
       auto-create: true
     bootstrap-servers: localhost:9091
 
-# Kafka Producer
+    # Kafka Producer
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
