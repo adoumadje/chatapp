@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.adoumadje</groupId>
-	<artifactId>chatapp</artifactId>
+	<artifactId>chatserver</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>chatapp</name>
+	<name>chatserver</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
