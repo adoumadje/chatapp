@@ -12,18 +12,25 @@ import com.adoumadje.chatapp.user.mapper.UserMapper;
 import com.adoumadje.chatapp.user.service.IUserService;
 import com.adoumadje.chatapp.common.utils.Constants;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RequiredArgsConstructor
 @Service
@@ -32,8 +39,10 @@ public class UserServiceImpl implements IUserService {
     private final UserMapper userMapper;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Value("$user.events.topic.name")
+    @Value("${user.events.topic.name}")
     private String userEventsTopicName;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 
     @Override
@@ -62,11 +71,25 @@ public class UserServiceImpl implements IUserService {
             throw new ResourceAlreadyExistsException(ChatUser.class.getSimpleName(), "email",
                     userRegistrationDto.getEmail());
         }
+        // Todo: change encoding to hashing
+        String encodedPassword = Base64.getEncoder().encodeToString(userRegistrationDto.getPassword()
+                .getBytes(StandardCharsets.UTF_8));
+        userRegistrationDto.setPassword(encodedPassword);
         ChatUser chatUser = userMapper.toChatUser(userRegistrationDto);
         chatUser.setMailBoxId(UUID.randomUUID());
-        ChatUser savedChatUser = userRepository.save(chatUser);
-        UserRegisteredEvent userRegisteredEvent = userMapper.toUserRegisteredEvent(savedChatUser);
-        kafkaTemplate.send(userEventsTopicName, userRegisteredEvent);
+        userRepository.save(chatUser);
+        UserRegisteredEvent userRegisteredEvent = userMapper.toUserRegisteredEvent(userRegistrationDto);
+        CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(userEventsTopicName, userRegisteredEvent);
+        future.whenComplete((result, exception) -> {
+            if(exception == null) {
+                RecordMetadata recordMetadata = result.getRecordMetadata();
+                logger.info("Event Sent with: {partition: {}, offset: {}}", recordMetadata.partition(),
+                        recordMetadata.offset());
+            } else {
+                throw new RuntimeException(exception.getMessage());
+            }
+        });
+        future.join();
         return new ResponseDto(Constants.STATUS_ACCEPTED, Constants.USER_REGISTRATION_MSG);
     }
 

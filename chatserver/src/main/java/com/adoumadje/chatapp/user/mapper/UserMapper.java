@@ -17,6 +17,6 @@ public interface UserMapper {
 
     List<UserDto> toDtoList(List<ChatUser> users);
 
-    UserRegisteredEvent toUserRegisteredEvent(ChatUser user);
+    UserRegisteredEvent toUserRegisteredEvent(UserRegistrationDto userRegistrationDto);
 
 }
