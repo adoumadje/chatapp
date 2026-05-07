@@ -17,6 +17,10 @@ spring:
   application:
     name: chatapp
 
+  config:
+    import:
+      - "application-liquibase.yaml"
+
   h2:
     console:
       enabled: true

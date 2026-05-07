@@ -7,6 +7,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -20,6 +22,7 @@ public class ChatUser extends BaseEntity {
     @Column(unique = true, updatable = false)
     private String email;
     private String profilePictureUrl;
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(unique = true, updatable = false)
     private UUID mailBoxId;
 }
