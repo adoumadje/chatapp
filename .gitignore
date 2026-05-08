@@ -2,3 +2,5 @@
 
 kafka-data
 kafka-magic
+
+client/*

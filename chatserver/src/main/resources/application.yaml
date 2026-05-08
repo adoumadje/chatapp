@@ -17,6 +17,12 @@ spring:
   application:
     name: chatapp
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: "https://www.googleapis.com/oauth2/v3/certs"
+
   config:
     import:
       - "application-liquibase.yaml"
@@ -33,6 +39,9 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: 'create-drop'
+  liquibase:
+    enabled: false
+
   kafka:
     bootstrap-servers: "localhost:9092"
 
