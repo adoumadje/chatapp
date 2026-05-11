@@ -3,7 +3,7 @@ services:
     image: postgres:14
     hostname: postgresql
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - ./pg-data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: "conduktor-console"
       POSTGRES_USER: "conduktor"
@@ -14,7 +14,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - conduktor_data:/var/conduktor
+      - ./conduktor-data:/var/conduktor
     environment:
       CDK_DATABASE_URL: "postgresql://conduktor:some_password@postgresql:5432/conduktor-console"
       CDK_CLUSTERS_0_ID: "default"
@@ -48,6 +48,3 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
-volumes:
-  pg_data: {./pg-data}
-  conduktor_data: {./conduktor-data}
