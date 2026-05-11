@@ -1,6 +1,6 @@
 .idea
 
-kafka-data
-kafka-magic
+conduktor-data
+pg-data
 
 client/*
