@@ -21,22 +21,21 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements IUserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Value("${user.events.topic.name}")
@@ -72,9 +71,8 @@ public class UserServiceImpl implements IUserService {
                     userRegistrationDto.getEmail());
         }
         // Todo: change encoding to hashing
-        String encodedPassword = Base64.getEncoder().encodeToString(userRegistrationDto.getPassword()
-                .getBytes(StandardCharsets.UTF_8));
-        userRegistrationDto.setPassword(encodedPassword);
+        String hashedPassword = passwordEncoder.encode(userRegistrationDto.getPassword());
+        userRegistrationDto.setPassword(hashedPassword);
         ChatUser chatUser = userMapper.toChatUser(userRegistrationDto);
         chatUser.setMailBoxId(UUID.randomUUID());
         userRepository.save(chatUser);
