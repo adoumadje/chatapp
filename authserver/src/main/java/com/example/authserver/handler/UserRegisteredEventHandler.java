@@ -1,9 +1,9 @@
 package com.example.authserver.handler;
 
 import com.adoumadje.chatapp.core.events.UserRegisteredEvent;
-import com.example.authserver.UserRepository;
 import com.example.authserver.entity.AppUser;
 import com.example.authserver.mapper.UserMapper;
+import com.example.authserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
