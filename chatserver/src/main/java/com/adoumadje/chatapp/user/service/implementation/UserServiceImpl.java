@@ -48,10 +48,10 @@ public class UserServiceImpl implements IUserService {
     public List<UserDto> findUsers(Principal principal, String keyword, Integer pageNumber) {
         pageNumber = pageNumber == null ? 0 : pageNumber - 1;
         Pageable pageable = PageRequest.of(pageNumber, Constants.PAGE_SIZE);
-        String email = principal.getName();
-        Optional<ChatUser> optionalChatUser = userRepository.findByEmail(email);
+        String jwtSub = principal.getName();
+        Optional<ChatUser> optionalChatUser = userRepository.findByUsernameOrEmail(jwtSub, jwtSub);
         if(optionalChatUser.isEmpty()) {
-            throw new ResourceNotFoundException(ChatUser.class.getSimpleName(), "email", email);
+            throw new ResourceNotFoundException(ChatUser.class.getSimpleName(), "username | email", jwtSub);
         }
         ChatUser user = optionalChatUser.get();
         List<ChatUser> chatUsers = keyword == null ? findUsers(user, pageable) : findUsers(user, keyword, pageable);
@@ -60,21 +60,17 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ResponseDto registerUser(UserRegistrationDto userRegistrationDto) {
-        Optional<ChatUser> optionalChatUser = userRepository.findByUsername(userRegistrationDto.getUsername());
-        if(optionalChatUser.isPresent()) {
-            throw new ResourceAlreadyExistsException(ChatUser.class.getSimpleName(), "username",
-                    userRegistrationDto.getUsername());
-        }
-        optionalChatUser = userRepository.findByEmail(userRegistrationDto.getEmail());
+        Optional<ChatUser> optionalChatUser = userRepository.findByEmail(userRegistrationDto.getEmail());
         if(optionalChatUser.isPresent()) {
             throw new ResourceAlreadyExistsException(ChatUser.class.getSimpleName(), "email",
                     userRegistrationDto.getEmail());
         }
-        // Todo: change encoding to hashing
+        UUID mailBoxId = UUID.randomUUID();
+        userRegistrationDto.setUsername(userRegistrationDto.getUsername() + "__" + mailBoxId);
         String hashedPassword = passwordEncoder.encode(userRegistrationDto.getPassword());
         userRegistrationDto.setPassword(hashedPassword);
         ChatUser chatUser = userMapper.toChatUser(userRegistrationDto);
-        chatUser.setMailBoxId(UUID.randomUUID());
+        chatUser.setMailBoxId(mailBoxId);
         userRepository.save(chatUser);
         UserRegisteredEvent userRegisteredEvent = userMapper.toUserRegisteredEvent(userRegistrationDto);
         CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(userEventsTopicName, userRegisteredEvent);
