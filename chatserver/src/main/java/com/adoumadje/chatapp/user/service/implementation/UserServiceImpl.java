@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -42,6 +43,18 @@ public class UserServiceImpl implements IUserService {
     private String userEventsTopicName;
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
+    @Override
+    public UserDto getOrCreateUser(Jwt jwt) {
+        String issuer = (String) jwt.getClaims().get("iss");
+        if(issuer.equals(Constants.GOOGLE_TOKEN_ISSUER)) {
+            return googleGetOrCreateUser(jwt);
+        } else if (issuer.equals(Constants.AUTH_SERVER_TOKEN_ISSUER)) {
+            return getLocalUser(jwt);
+        } else {
+            throw new RuntimeException("Unknown token issuer");
+        }
+    }
 
 
     @Override
@@ -95,5 +108,11 @@ public class UserServiceImpl implements IUserService {
     private List<ChatUser> findUsers(ChatUser user, String keyword, Pageable pageable) {
         Page<ChatUser> chatUserPage = userRepository.searchUsers(user.getId(), keyword, pageable);
         return chatUserPage.getContent();
+    }
+
+    private UserDto getLocalUser(Jwt jwt) {
+    }
+
+    private UserDto googleGetOrCreateUser(Jwt jwt) {
     }
 }

@@ -4,10 +4,10 @@ import com.adoumadje.chatapp.common.dto.ResponseDto;
 import com.adoumadje.chatapp.user.dto.UserDto;
 import com.adoumadje.chatapp.user.dto.UserRegistrationDto;
 import com.adoumadje.chatapp.user.service.IUserService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +19,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final IUserService iUserService;
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> getUser(Jwt jwt) {
+        UserDto userDto = iUserService.getOrCreateUser(jwt);
+        return new ResponseEntity<>(userDto, HttpStatus.OK);
+    }
 
     @GetMapping
     public ResponseEntity<List<UserDto>> findUsers(Principal principal, @RequestParam(required = false) String keyword,
