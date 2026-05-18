@@ -24,7 +24,7 @@ public class UserRegisteredEventHandler {
     @KafkaHandler
     public void handleUserRegisteredEvent(@Payload UserRegisteredEvent userRegisteredEvent) {
         AppUser appUser = userMapper.toAppUser(userRegisteredEvent);
-        userRepository.save(appUser);
+        AppUser savedUser =  userRepository.save(appUser);
         logger.info("User successfully registered in AuthServer");
     }
 }

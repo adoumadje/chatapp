@@ -7,10 +7,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.FactorGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -27,7 +31,9 @@ public class AppUsernamePwdAuthenticationProvider implements AuthenticationProvi
         if(!passwordEncoder.matches(rawPassword, dbUser.getPassword())) {
             throw new BadCredentialsException("Invalid Password");
         }
-        return new UsernamePasswordAuthenticationToken(username, null, null);
+        Collection<GrantedAuthority> grantedAuthorities = List.of(FactorGrantedAuthority
+                .fromAuthority(FactorGrantedAuthority.PASSWORD_AUTHORITY));
+        return new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
     }
 
     @Override

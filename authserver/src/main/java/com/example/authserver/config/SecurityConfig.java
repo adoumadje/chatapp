@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,8 +19,13 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((authorize) ->
                         authorize
+                                .requestMatchers("/h2-console/**").permitAll()
                                 .anyRequest().authenticated()
                 )
+                .csrf(csrfConfig -> csrfConfig
+                        .ignoringRequestMatchers("/h2-console/**"))
+                .headers(headersConfig -> headersConfig
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .formLogin(Customizer.withDefaults())
                 .oauth2AuthorizationServer((authorizationServer) ->
                         authorizationServer
