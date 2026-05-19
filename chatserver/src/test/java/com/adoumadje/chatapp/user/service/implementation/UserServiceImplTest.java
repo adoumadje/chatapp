@@ -17,10 +17,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -46,7 +51,7 @@ class UserServiceImplTest {
         Mockito.when(userRepository.searchUsers(Mockito.any(), Mockito.anyString(), Mockito.any()))
                 .thenReturn(pageOfUsers());
 
-        List<UserDto> userDtos = userService.findUsers(()-> "John", "Kyl", 1);
+        List<UserDto> userDtos = userService.findUsers(null, "Kyl", 1);
 
         // Assertions
         Assertions.assertFalse(userDtos.isEmpty());
@@ -60,7 +65,7 @@ class UserServiceImplTest {
         Mockito.when(userRepository.findByIdNot(Mockito.any(), Mockito.any()))
                 .thenReturn(pageOfUsers());
 
-        List<UserDto> userDtos = userService.findUsers(()-> "John", null, 1);
+        List<UserDto> userDtos = userService.findUsers(null, null, 1);
 
         // Assertions
         Assertions.assertFalse(userDtos.isEmpty());
@@ -116,5 +121,31 @@ class UserServiceImplTest {
         chatUser.setProfilePictureUrl("https://example.com/images/jdoe.png");
 
         return chatUser;
+    }
+
+    private Jwt createRandomJwt() {
+        String tokenValue = UUID.randomUUID().toString();
+
+        Instant issuedAt = Instant.now();
+        Instant expiresAt = issuedAt.plus(1, ChronoUnit.HOURS);
+
+        Map<String, Object> headers = Map.of(
+                "alg", "HS256",
+                "typ", "JWT"
+        );
+
+        Map<String, Object> claims = Map.of(
+                "sub", UUID.randomUUID().toString(),
+                "email", "user@example.com",
+                "role", "USER"
+        );
+
+        return new Jwt(
+                tokenValue,
+                issuedAt,
+                expiresAt,
+                headers,
+                claims
+        );
     }
 }

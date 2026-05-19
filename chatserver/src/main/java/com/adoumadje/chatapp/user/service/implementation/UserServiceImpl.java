@@ -21,12 +21,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -45,7 +48,9 @@ public class UserServiceImpl implements IUserService {
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
-    public UserDto getOrCreateUser(Jwt jwt) {
+    public UserDto getOrCreateUser(Authentication authentication) {
+        JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
+        Jwt jwt = jwtAuthenticationToken.getToken();
         String issuer = (String) jwt.getClaims().get("iss");
         if(issuer.equals(Constants.GOOGLE_TOKEN_ISSUER)) {
             return googleGetOrCreateUser(jwt);
@@ -58,13 +63,15 @@ public class UserServiceImpl implements IUserService {
 
 
     @Override
-    public List<UserDto> findUsers(Principal principal, String keyword, Integer pageNumber) {
+    public List<UserDto> findUsers(Authentication authentication, String keyword, Integer pageNumber) {
+        JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
+        Jwt jwt = jwtAuthenticationToken.getToken();
         pageNumber = pageNumber == null ? 0 : pageNumber - 1;
         Pageable pageable = PageRequest.of(pageNumber, Constants.PAGE_SIZE);
-        String jwtSub = principal.getName();
-        Optional<ChatUser> optionalChatUser = userRepository.findByUsernameOrEmail(jwtSub, jwtSub);
+        String email = jwt.getClaims().get("email").toString();
+        Optional<ChatUser> optionalChatUser = userRepository.findByEmail(email);
         if(optionalChatUser.isEmpty()) {
-            throw new ResourceNotFoundException(ChatUser.class.getSimpleName(), "username | email", jwtSub);
+            throw new ResourceNotFoundException(ChatUser.class.getSimpleName(), "email", email);
         }
         ChatUser user = optionalChatUser.get();
         List<ChatUser> chatUsers = keyword == null ? findUsers(user, pageable) : findUsers(user, keyword, pageable);
@@ -111,8 +118,34 @@ public class UserServiceImpl implements IUserService {
     }
 
     private UserDto getLocalUser(Jwt jwt) {
+        String email = jwt.getClaims().get("email").toString();
+        Optional<ChatUser> optionalChatUser = userRepository.findByEmail(email);
+        if(optionalChatUser.isEmpty()) {
+            throw new ResourceNotFoundException(ChatUser.class.getSimpleName(), "email", email);
+        }
+        ChatUser chatUser = optionalChatUser.get();
+        return userMapper.toDto(chatUser);
     }
 
     private UserDto googleGetOrCreateUser(Jwt jwt) {
+        String email = jwt.getClaims().get("email").toString();
+        Optional<ChatUser> optionalChatUser = userRepository.findByEmail(email);
+        if(optionalChatUser.isEmpty()) {
+            return registerGoogleUser(jwt);
+        }
+        ChatUser chatUser = optionalChatUser.get();
+        return userMapper.toDto(chatUser);
+    }
+
+    private UserDto registerGoogleUser(Jwt jwt) {
+        Map<String, Object> claims = jwt.getClaims();
+        UUID mailBoxId = UUID.randomUUID();
+        String username = "GoogleUser__" + claims.get("sub") + "__" + mailBoxId;
+        String firstname = claims.get("given_name").toString();
+        String lastname = claims.get("given_name").toString();
+        String email = claims.get("email").toString();
+        String profilePictureUrl = claims.get("picture").toString();
+        // Todo: complete google registration
+        return null;
     }
 }

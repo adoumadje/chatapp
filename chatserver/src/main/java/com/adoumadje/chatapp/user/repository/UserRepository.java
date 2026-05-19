@@ -27,8 +27,4 @@ public interface UserRepository extends JpaRepository<ChatUser, Long> {
             AND u.id <> :excludedId
             """)
     Page<ChatUser> searchUsers(@Param("excludedId") Long excludedId, @Param("keyword") String keyword, Pageable pageable);
-
-    Optional<ChatUser> findByUsername(String username);
-
-    Optional<ChatUser> findByUsernameOrEmail(String username, String email);
 }

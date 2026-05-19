@@ -1,5 +1,6 @@
 package com.adoumadje.chatapp.common.config;
 
+import com.adoumadje.chatapp.common.utils.Constants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -8,7 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtIssuerAuthenticationManagerResolver;
 import org.springframework.security.web.SecurityFilterChain;
 
 @EnableWebSecurity
@@ -17,7 +18,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) {
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        JwtIssuerAuthenticationManagerResolver jwtIssuerAuthenticationManagerResolver = JwtIssuerAuthenticationManagerResolver
+                .fromTrustedIssuers(Constants.GOOGLE_TOKEN_ISSUER, Constants.AUTH_SERVER_TOKEN_ISSUER);
 
         http.sessionManagement(sessionConfig ->
                 sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -30,7 +32,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated());
 
         http.oauth2ResourceServer(rsConfig -> rsConfig
-                .jwt(jwtConfig -> jwtConfig.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+                .authenticationManagerResolver(jwtIssuerAuthenticationManagerResolver));
 
         return http.build();
     }

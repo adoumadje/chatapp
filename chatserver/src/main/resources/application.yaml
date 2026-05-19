@@ -17,12 +17,12 @@ spring:
   application:
     name: chatapp
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
 #          jwk-set-uri: "https://www.googleapis.com/oauth2/v1/certs"
-          jwk-set-uri: "http://localhost:8089/oauth2/jwks"
+#          jwk-set-uri: "http://localhost:8089/oauth2/jwks"
 
   config:
     import:
@@ -57,3 +57,7 @@ user:
   events:
     topic:
       name: "user-events"
+
+logging:
+  level:
+    org.springframework.security: trace

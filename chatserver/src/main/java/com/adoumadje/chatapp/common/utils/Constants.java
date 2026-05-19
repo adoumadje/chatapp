@@ -11,7 +11,7 @@ public final class Constants {
 
     public static final String USER_REGISTRATION_MSG = "User registered successfully";
 
-    public static final String GOOGLE_TOKEN_ISSUER = "";
+    public static final String GOOGLE_TOKEN_ISSUER = "https://accounts.google.com";
     public static final String AUTH_SERVER_TOKEN_ISSUER = "http://localhost:8089";
 
 }

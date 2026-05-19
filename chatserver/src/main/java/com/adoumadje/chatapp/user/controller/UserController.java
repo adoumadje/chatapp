@@ -7,6 +7,7 @@ import com.adoumadje.chatapp.user.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,15 +22,15 @@ public class UserController {
     private final IUserService iUserService;
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getUser(Jwt jwt) {
-        UserDto userDto = iUserService.getOrCreateUser(jwt);
+    public ResponseEntity<UserDto> getUser(Authentication authentication) {
+        UserDto userDto = iUserService.getOrCreateUser(authentication);
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDto>> findUsers(Principal principal, @RequestParam(required = false) String keyword,
-                                                    @RequestParam(required = false) Integer pageNumber) {
-        List<UserDto> users = iUserService.findUsers(principal, keyword, pageNumber);
+    public ResponseEntity<List<UserDto>> findUsers(Authentication authentication, @RequestParam(required = false) String keyword,
+                                                   @RequestParam(required = false) Integer pageNumber) {
+        List<UserDto> users = iUserService.findUsers(authentication, keyword, pageNumber);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
