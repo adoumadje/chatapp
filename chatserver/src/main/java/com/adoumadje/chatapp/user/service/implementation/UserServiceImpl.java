@@ -142,10 +142,13 @@ public class UserServiceImpl implements IUserService {
         UUID mailBoxId = UUID.randomUUID();
         String username = "GoogleUser__" + claims.get("sub") + "__" + mailBoxId;
         String firstname = claims.get("given_name").toString();
-        String lastname = claims.get("given_name").toString();
+        String lastname = claims.get("family_name").toString();
         String email = claims.get("email").toString();
         String profilePictureUrl = claims.get("picture").toString();
-        // Todo: complete google registration
-        return null;
+        ChatUser chatUser = ChatUser.builder().username(username)
+                .firstname(firstname).lastname(lastname).email(email)
+                .profilePictureUrl(profilePictureUrl).mailBoxId(mailBoxId).build();
+        ChatUser savedChatUser = userRepository.save(chatUser);
+        return userMapper.toDto(savedChatUser);
     }
 }
